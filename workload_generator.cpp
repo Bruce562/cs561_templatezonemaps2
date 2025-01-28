@@ -22,7 +22,6 @@ struct Parameters {
 	bool sort_flag; // the flag that indicates if the input workload is sorted
 };
 
-//Test
 int parse_arguments(int argc, char *argv[], Parameters & params);
 void generate_input_data(std::string & output_path, Parameters & params,
 		std::vector<int> & input_data);
