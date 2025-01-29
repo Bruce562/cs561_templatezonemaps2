@@ -14,20 +14,11 @@ std::string kInputDataPath = "./workload.dat";
 std::string kPointQueriesPath = "./point_queries.txt";
 std::string kRangeQueriesPath = "./range_queries.txt";
 const uint32_t kRuns = 3;
+
 using namespace std;
 
-void loadPointQueries(std::string & input_queries_path, std::vector<int> & queries)
-{
-  queries.clear();
-  std::ifstream infile(input_queries_path, ios::in);
-  int tmp;
-  while (infile >> tmp) {
-	  queries.push_back(tmp);
-  }
-  // shuffle indexes
-  std::random_shuffle(queries.begin(), queries.end());
-
-}
+void loadPointQueries(std::string & input_queries_path, 
+                      std::vector<int> & queries);
 
 int main(int argc, char **argv)
 { 
@@ -36,24 +27,24 @@ int main(int argc, char **argv)
   std::ifstream ifs;
   std::vector<int> data;
 
-  ifs.open(kInputDataPath, std::ios::binary);
+  ifs.open(kInputDataPath, std::ios::binary); // Opens a file that is in binary
   ifs.seekg(0, std::ios::end);
   size_t filesize = ifs.tellg();
   ifs.seekg(0, std::ios::beg);
 
   data.resize(filesize / sizeof(int));
-  ifs.read((char *)data.data(), filesize);
+  ifs.read((char *)data.data(), filesize); // Reads from file and places into data vector
 
   //1. ----------------------------- initialize zonemap and build -----------------------------
   //build zonemap
-  zonemap<int> zones(data, (uint)data.size() / 100);
+  zonemap<int> zones(data, (uint)data.size() / 100); // len(data)/100
 
   //2. ----------------------------- point queries -----------------------------
   std::vector<int> queries;
   loadPointQueries(kPointQueriesPath, queries); 
 
-  auto start_pq = std::chrono::high_resolution_clock::now();
-  for (size_t r = 0; r < kRuns; r++) {
+  auto start_pq = std::chrono::high_resolution_clock::now(); // Store a timestamp
+  for (size_t r = 0; r < kRuns; r++) { // kRUns 3
     for (int pq: queries) {
       // query from zonemaps here 
       zones.query(pq);
@@ -73,4 +64,15 @@ int main(int argc, char **argv)
 
   std::cout << "Time taken to perform range query from zonemap = " << range_query_time*1.0/kRuns << " microseconds" << endl;
   return 0;
+}
+
+void loadPointQueries(std::string & input_queries_path, std::vector<int> & queries) {
+  queries.clear();
+  std::ifstream infile(input_queries_path, ios::in); // Reads in the file
+  int tmp;
+  while (infile >> tmp) { // Reads queries line by line
+	  queries.push_back(tmp); // Add to list of queries
+  }
+  // shuffle indexes
+  std::random_shuffle(queries.begin(), queries.end()); // Shuffles the queries
 }
