@@ -97,19 +97,19 @@ void generate_input_data(std::string & output_path, Parameters & params,
 	input_data.clear();
 	input_data.resize(params.N);
 	// construct a trivial random generator engine from a time-based seed:
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();	
-	std::default_random_engine gen (seed);
-	std::uniform_int_distribution<int>  dist(0, params.UB);
-	std::ofstream output_file(output_path, std::ios::binary);
-	if (params.sort_flag){
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count(); // Generates a random time-based seed
+	std::default_random_engine gen (seed); // Creates an engine to generate random numbers
+	std::uniform_int_distribution<int>  dist(0, params.UB); // Creates a distribution from 0 to the upper bound passed in
+	std::ofstream output_file(output_path, std::ios::binary); // Creates and opens a file at the output_path
+	if (params.sort_flag){ // If need to sort
 		for (size_t i = 0; i < params.N; i++) {
-			input_data[i] = dist(gen);
+			input_data[i] = dist(gen); // Generate N random numbers
 		}
 		sort(input_data.begin(), input_data.end());
-		for (size_t i = 0; i < params.N; i++) {
+		for (size_t i = 0; i < params.N; i++) { // Write the sorted input into the file
         		output_file.write(reinterpret_cast<char *>(&input_data[i]), sizeof(int));
 		}
-	} else {
+	} else { // Don't sort
 		for (size_t i = 0; i < params.N; i++) {
 			input_data[i] = dist(gen);
         		output_file.write(reinterpret_cast<char *>(&input_data[i]), sizeof(int));
@@ -121,20 +121,21 @@ void generate_input_data(std::string & output_path, Parameters & params,
 void generate_point_queries(std::string & output_path, Parameters & params, 
 		std::vector<int> & input_data) {
 
+	// Creates a random number generator and creates 2 distributions
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();	
 	std::default_random_engine gen (seed);
-	std::uniform_int_distribution<int>  dist1(0, (size_t) (2.0*params.UB));
-	std::uniform_int_distribution<int>  dist2(0, input_data.size() - 1);
+	std::uniform_int_distribution<int>  dist1(0, (size_t) (2.0*params.UB)); // 0 to 2*upper_bound (inclusive)
+	std::uniform_int_distribution<int>  dist2(0, input_data.size() - 1); // 0, len(input_data)-1
 	std::ofstream output_file(output_path);
 	srand(time(NULL));
 	for (size_t i = 0; i < params.P; i++) {
-		if (rand()*1.0/RAND_MAX <= 0.2) {
+		if (rand()*1.0/RAND_MAX <= 0.2) { // Gen random float between [0,1]
 			// with 0.2 probability, randomly generate point queries, may contain existing
 			// or non-exising queries
-			output_file << dist1(gen) << std::endl;
+			output_file << dist1(gen) << std::endl; // Write a random int using dist1
 		} else {
 			// generate existing queries
-			output_file << input_data[dist2(gen)] << std::endl;
+			output_file << input_data[dist2(gen)] << std::endl; // Generate a random index and write the value stored in input_data
 		}
 	}
 	// The above process may produce duplicate point queries. And the number of exsiting quries
